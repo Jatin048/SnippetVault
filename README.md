@@ -127,7 +127,7 @@ A quick look at SnippetVault's interface and core functionality.
 ### 🏠 Main Window
 
 <p align="center">
-<img src="assets/screenshots/home.png" width="90%">
+<img src="assets/screenshots/home.png" width="70%">
 </p>
 
 Displays all saved snippets with search, filtering, favorites, and quick actions.
@@ -147,7 +147,7 @@ Create and save reusable code snippets with language, tags, description, and sou
 ### 🔍 Search & Filter
 
 <p align="center">
-<img src="assets/screenshots/search-filter.png" width="90%">
+<img src="assets/screenshots/search-filter.png" width="70%">
 </p>
 
 Instantly search snippets by title and filter them by programming language.
@@ -157,7 +157,7 @@ Instantly search snippets by title and filter them by programming language.
 ### ⭐ Favorites
 
 <p align="center">
-<img src="assets/screenshots/favorites.png" width="90%">
+<img src="assets/screenshots/favorites.png" width="70%">
 </p>
 
 Mark frequently used snippets as favorites for quicker access.
