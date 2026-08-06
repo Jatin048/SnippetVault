@@ -1,9 +1,13 @@
-"""Application entry point for SnippetVault.
+"""Application entry point for SnippetVault."""
 
-This module will initialize the desktop application and compose its MVC layers.
-"""
+import tkinter as tk
+
+from controller import SnippetController
+from ui import SnippetVaultUI
 
 
 if __name__ == "__main__":
-    # Application startup will be added here.
-    pass
+    root = tk.Tk()
+    controller = SnippetController()
+    SnippetVaultUI(root, controller)
+    root.mainloop()
