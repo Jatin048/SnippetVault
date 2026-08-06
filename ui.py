@@ -400,7 +400,7 @@ class SnippetVaultUI:
             ("Add", self._open_add_dialog),
             ("Edit", self._open_edit_dialog),
             ("Delete", self._delete_selected_snippet),
-            ("Favorite", self._show_not_implemented),
+            ("Favorite", self._toggle_selected_favorite),
             ("Copy", self._show_not_implemented),
             ("Refresh", self._reset_filters_and_refresh),
         )
@@ -491,6 +491,40 @@ class SnippetVaultUI:
             "Snippet deleted successfully.",
             parent=self.root,
         )
+
+    def _toggle_selected_favorite(self) -> None:
+        """Toggle the favorite status of the selected snippet."""
+        snippet = self._get_selected_snippet()
+        if snippet is None:
+            return
+        if snippet.id is None:
+            messagebox.showerror(
+                "Could not update favorite",
+                "This snippet does not have a valid id.",
+                parent=self.root,
+            )
+            return
+
+        try:
+            updated = self.controller.toggle_favorite(snippet.id)
+        except (ValueError, DatabaseError) as error:
+            messagebox.showerror(
+                "Could not update favorite",
+                str(error),
+                parent=self.root,
+            )
+            return
+
+        if not updated:
+            messagebox.showerror(
+                "Could not update favorite",
+                "This snippet no longer exists.",
+                parent=self.root,
+            )
+            self.refresh_snippet_table()
+            return
+
+        self.refresh_snippet_table(snippet.id)
 
     def _get_selected_item(self) -> str | None:
         """Return the single selected table item or show a helpful error."""
@@ -590,6 +624,9 @@ class SnippetVaultUI:
                 or snippet.language == selected_language
             )
         ]
+        filtered_snippets.sort(
+            key=lambda snippet: (not snippet.favorite, snippet.title.casefold())
+        )
         self._display_snippets(filtered_snippets, selected_snippet_id)
         return "break" if event is not None else None
 
