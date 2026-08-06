@@ -1,5 +1,6 @@
 # Python bytecode and caches
 __pycache__/
+*.pyc
 *.py[cod]
 
 # Virtual environments
@@ -13,7 +14,12 @@ env/
 htmlcov/
 
 # Local application data and editor settings
+snippets.db
 *.sqlite3
 *.db
 .vscode/
 .idea/
+
+# Operating system temporary files
+.DS_Store
+Thumbs.db
