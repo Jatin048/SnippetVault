@@ -292,6 +292,7 @@ class SnippetVaultUI:
         self.search_var = tk.StringVar()
         self.language_var = tk.StringVar(value="All")
         self.status_var = tk.StringVar(value="Ready")
+        self.all_snippets: list[Snippet] = []
 
         self.root.title("SnippetVault")
         self.root.geometry("1100x700")
@@ -324,6 +325,7 @@ class SnippetVaultUI:
         )
         self.search_entry = ttk.Entry(top_frame, textvariable=self.search_var)
         self.search_entry.grid(row=0, column=1, sticky="ew")
+        self.search_entry.bind("<KeyRelease>", self._apply_filters)
 
         ttk.Label(top_frame, text="Language:").grid(
             row=0,
@@ -339,6 +341,7 @@ class SnippetVaultUI:
             width=18,
         )
         self.language_filter.grid(row=0, column=3, sticky="e")
+        self.language_filter.bind("<<ComboboxSelected>>", self._apply_filters)
 
     def _create_snippet_table(self) -> None:
         """Create the snippet table and its vertical scrollbar."""
@@ -399,7 +402,7 @@ class SnippetVaultUI:
             ("Delete", self._delete_selected_snippet),
             ("Favorite", self._show_not_implemented),
             ("Copy", self._show_not_implemented),
-            ("Refresh", self._show_not_implemented),
+            ("Refresh", self._reset_filters_and_refresh),
         )
         for column, (label, command) in enumerate(buttons):
             ttk.Button(
@@ -544,11 +547,61 @@ class SnippetVaultUI:
             return None
 
     def refresh_snippet_table(self, selected_snippet_id: int | None = None) -> None:
-        """Reload the table and update the snippet-count status message."""
+        """Reload snippets once, then display the current filtered results."""
+        if selected_snippet_id is None:
+            selected_snippet_id = self._current_selected_snippet_id()
+
+        self.all_snippets = self.controller.get_all_snippets()
+        self._update_language_filter()
+        self._apply_filters(selected_snippet_id=selected_snippet_id)
+
+    def _reset_filters_and_refresh(self) -> None:
+        """Clear filters and reload the complete snippet list."""
+        self.search_var.set("")
+        self.language_var.set("All")
+        self.refresh_snippet_table()
+
+    def _update_language_filter(self) -> None:
+        """Populate the filter with languages present in the cached snippets."""
+        languages = sorted({snippet.language for snippet in self.all_snippets})
+        options = ("All", *languages)
+        self.language_filter.configure(values=options)
+
+        if self.language_var.get() not in options:
+            self.language_var.set("All")
+
+    def _apply_filters(
+        self,
+        event: tk.Event | None = None,
+        selected_snippet_id: int | None = None,
+    ) -> str | None:
+        """Filter cached snippets by title and language, then update the table."""
+        if selected_snippet_id is None:
+            selected_snippet_id = self._current_selected_snippet_id()
+
+        search_text = self.search_var.get().strip().casefold()
+        selected_language = self.language_var.get()
+        filtered_snippets = [
+            snippet
+            for snippet in self.all_snippets
+            if search_text in snippet.title.casefold()
+            and (
+                selected_language == "All"
+                or snippet.language == selected_language
+            )
+        ]
+        self._display_snippets(filtered_snippets, selected_snippet_id)
+        return "break" if event is not None else None
+
+    def _display_snippets(
+        self,
+        snippets: list[Snippet],
+        selected_snippet_id: int | None,
+    ) -> None:
+        """Render snippets in the table and update the result count."""
         for item_id in self.snippet_table.get_children():
             self.snippet_table.delete(item_id)
 
-        snippets = self.controller.get_all_snippets()
         for snippet in snippets:
             item_id = str(snippet.id)
             self.snippet_table.insert(
@@ -571,9 +624,21 @@ class SnippetVaultUI:
                 self.snippet_table.focus(item_id)
                 self.snippet_table.see(item_id)
 
-        count = len(snippets)
-        noun = "snippet" if count == 1 else "snippets"
-        self.status_var.set(f"{count} {noun} loaded")
+        self.status_var.set(
+            f"Showing {len(snippets)} of {len(self.all_snippets)} snippets"
+        )
+
+    def _current_selected_snippet_id(self) -> int | None:
+        """Return the selected snippet id without showing an error dialog."""
+        selected_items = self.snippet_table.selection()
+        if len(selected_items) != 1:
+            return None
+
+        values = self.snippet_table.item(selected_items[0], "values")
+        try:
+            return int(values[0])
+        except (IndexError, ValueError):
+            return None
 
     @staticmethod
     def _show_not_implemented() -> None:
