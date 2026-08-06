@@ -1,12 +1,15 @@
+
 # SnippetVault
 
 <p align="center">
-<img src="assets/banner.png" width="100%">
+  <img src="assets/banner.png" alt="SnippetVault Banner" width="100%">
 </p>
 
-### A Modern Desktop Application for Managing Reusable Code Snippets
+<p align="center">
+A modern desktop application for organizing, searching, and managing reusable code snippets.
+</p>
 
-**Organize • Search • Reuse**
+<p align="center">
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)
 ![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite)
@@ -14,16 +17,30 @@
 ![Architecture](https://img.shields.io/badge/Architecture-MVC--Inspired-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+</p>
+
 ---
 
-## 📑 Table of Contents
+## ✨ Highlights
+
+- Desktop application built with **Python, Tkinter, and SQLite**
+- MVC-inspired architecture with clear separation of concerns
+- Full CRUD support for code snippets
+- Search, language filtering, favorites, and clipboard integration
+- Persistent SQLite database
+- Keyboard shortcuts and polished desktop UI
+
+---
+
+# 📑 Table of Contents
 
 - Overview
 - Problem Statement
+- Motivation
 - Features
 - Screenshots
 - Architecture
-- Application Flow
+- Application Workflow
 - Project Structure
 - Technologies Used
 - Installation
@@ -33,76 +50,133 @@
 - Software Engineering Concepts
 - Future Roadmap
 - Project Status
-- Why I Built This
 - License
 
 ---
 
 # 📖 Overview
 
-SnippetVault is a desktop application built with **Python, Tkinter, and SQLite** for organizing, searching, editing, and managing reusable code snippets. It demonstrates clean software architecture, CRUD operations, database integration, and desktop GUI development.
+SnippetVault is a desktop application that provides a central place to store, organize, search, and reuse code snippets across different programming languages.
+
+Instead of saving useful code in scattered text files or old projects, developers can manage their snippets through a clean desktop interface backed by SQLite. The project was built to practice real-world software engineering concepts while creating a genuinely useful developer tool.
 
 ---
 
 # 🎯 Problem Statement
 
-Developers often save useful snippets across notes, old projects, and text files. Finding the right snippet later becomes difficult. SnippetVault provides a centralized place to store, search, organize, and quickly reuse code.
+Developers frequently lose track of reusable code because snippets are spread across notes, folders, and previous projects.
+
+SnippetVault solves this problem by providing:
+
+- Centralized snippet storage
+- Fast searching
+- Language-based filtering
+- Favorites
+- One-click clipboard copying
+- Persistent local storage
+
+---
+
+# 💡 Project Motivation
+
+This project was built as a portfolio project to learn Python by building a complete software application rather than following isolated tutorials.
+
+The primary focus was to practice:
+
+- Object-Oriented Programming
+- Modular software design
+- Desktop GUI development
+- SQLite database integration
+- Clean architecture
+- Git and GitHub workflows
 
 ---
 
 # ✨ Features
 
-- Add, Edit, View and Delete snippets
+### Snippet Management
+- Add snippets
+- View snippet details
+- Edit snippets
+- Delete snippets with confirmation
+
+### Search & Organization
 - Search by title
 - Filter by programming language
-- Mark snippets as favorites
-- Copy code to clipboard
-- SQLite persistent storage
+- Favorites support
+- Dynamic refresh
+
+### Productivity
+- Copy snippet code to clipboard
 - Keyboard shortcuts
+- Status updates
+- Persistent SQLite storage
+
+### Reliability
 - Input validation
-- Dynamic status updates
+- Exception handling
+- Automatic startup loading
+- Responsive interface
 
 ---
 
 # 📸 Screenshots
 
-- Main Window: `assets/screenshots/home.png`
-- Add Dialog: `assets/screenshots/add-dialog.png`
-- Search & Filter: `assets/screenshots/search-filter.png`
-- Favorites: `assets/screenshots/favorites.png`
+| Main Window | Search & Filter |
+|------------|-----------------|
+| ![](assets/screenshots/home.png) | ![](assets/screenshots/search-filter.png) |
+
+| Add Dialog | Favorites |
+|------------|-----------|
+| ![](assets/screenshots/add-dialog.png) | ![](assets/screenshots/favorites.png) |
 
 ---
 
 # 🏗 Architecture
 
-![Architecture](assets/architecture.png)
+<p align="center">
+<img src="assets/architecture.png" width="90%">
+</p>
 
-```
+The project follows an MVC-inspired architecture.
+
+```text
 User
-  ↓
-Tkinter GUI
-  ↓
-Controller
-  ↓
-Database Manager
-  ↓
-SQLite
+  │
+  ▼
+Tkinter GUI (ui.py)
+  │
+  ▼
+SnippetController (controller.py)
+  │
+  ▼
+DatabaseManager (database.py)
+  │
+  ▼
+SQLite Database
 ```
 
 ---
 
-# 🔄 Application Flow
+# 🔄 Application Workflow
 
-```
-User
- ↓
-GUI
- ↓
-Controller
- ↓
-SQLite Database
- ↓
-Updated Results
+```text
+Launch Application
+        │
+        ▼
+ Load Saved Snippets
+        │
+        ▼
+Search / Filter / CRUD
+        │
+        ▼
+ Controller Layer
+        │
+        ▼
+ SQLite Database
+        │
+        ▼
+ Updated Interface
 ```
 
 ---
@@ -112,14 +186,17 @@ Updated Results
 ```text
 SnippetVault/
 ├── assets/
+│   ├── banner.png
+│   ├── architecture.png
+│   └── screenshots/
 ├── tests/
-├── main.py
-├── ui.py
+├── clipboard.py
 ├── controller.py
 ├── database.py
+├── main.py
 ├── models.py
 ├── search.py
-├── clipboard.py
+├── ui.py
 ├── utils.py
 ├── README.md
 ├── requirements.txt
@@ -133,9 +210,10 @@ SnippetVault/
 
 | Technology | Purpose |
 |------------|---------|
-| Python 3.13 | Programming Language |
+| Python 3.13 | Application Development |
 | Tkinter | Desktop GUI |
-| SQLite | Database |
+| SQLite | Local Database |
+| Dataclasses | Data Model |
 | Git | Version Control |
 | GitHub | Repository Hosting |
 
@@ -146,9 +224,12 @@ SnippetVault/
 ```bash
 git clone https://github.com/YOUR_USERNAME/SnippetVault.git
 cd SnippetVault
+
 python -m venv .venv
 .venv\Scripts\activate
+
 pip install -r requirements.txt
+
 python main.py
 ```
 
@@ -158,10 +239,10 @@ python main.py
 
 1. Launch the application.
 2. Add snippets.
-3. Search and filter snippets.
+3. Search or filter snippets.
 4. Edit or delete snippets.
-5. Copy code to clipboard.
-6. Mark favorites.
+5. Mark favorites.
+6. Copy code for reuse.
 
 ---
 
@@ -169,18 +250,29 @@ python main.py
 
 | Shortcut | Action |
 |----------|--------|
-| Ctrl+N | Add |
-| Ctrl+F | Focus Search |
-| Ctrl+R | Refresh |
-| Ctrl+C | Copy |
-| Delete | Delete |
+| Ctrl + N | Add Snippet |
+| Ctrl + F | Focus Search |
+| Ctrl + R | Refresh |
+| Ctrl + C | Copy Code |
+| Delete | Delete Snippet |
 | Esc | Close Dialog |
 
 ---
 
 # 🧪 Testing
 
-The application was tested for CRUD operations, persistence, search, filtering, favorites, clipboard support, keyboard shortcuts, validation, resizing, and restart behavior.
+The application has been tested for:
+
+- CRUD operations
+- Search
+- Language filtering
+- Favorites
+- Clipboard integration
+- Keyboard shortcuts
+- SQLite persistence
+- Input validation
+- Window resizing
+- Startup and restart behaviour
 
 ---
 
@@ -188,53 +280,61 @@ The application was tested for CRUD operations, persistence, search, filtering, 
 
 - Object-Oriented Programming
 - MVC-inspired Architecture
+- Separation of Concerns
+- Modular Design
 - CRUD Operations
 - SQLite Integration
-- Modular Design
-- Separation of Concerns
-- Exception Handling
-- Version Control
+- Error Handling
+- Data Persistence
+- Event-driven Programming
+- Version Control with Git
 
 ---
 
 # 🚀 Future Roadmap
 
-## Version 1.1
+### Version 1.1
 - Dark Mode
 - Syntax Highlighting
 - Pin Snippets
 
-## Version 1.2
+### Version 1.2
 - Import / Export
 - Categories
 - Multiple Collections
 
-## Version 2.0
-- Cloud Sync
+### Version 2.0
+- Cloud Synchronization
 - User Accounts
 - Authentication
 
-## Version 3.0
-- AI-powered Snippet Suggestions
-- Semantic Search
-- AI Code Explanation
+### Version 3.0
+- AI-powered snippet suggestions
+- Semantic search
+- AI-assisted code explanations
 
 ---
 
 # 📌 Project Status
 
-**Version 1.0**
+**Current Version:** **v1.0**
 
 ✅ Feature Complete
 
----
-
-# 💡 Why I Built This
-
-I built SnippetVault to improve my Python skills by creating a complete desktop application that demonstrates practical software engineering concepts while solving a real problem for developers.
+SnippetVault is fully functional and ready for portfolio demonstration. Future enhancements are documented in the roadmap above.
 
 ---
 
 # 📄 License
 
 This project is licensed under the MIT License.
+
+---
+
+<div align="center">
+
+**Built with Python ❤️ for learning software engineering through real-world projects.**
+
+⭐ If you found this project useful, consider starring the repository.
+
+</div>
