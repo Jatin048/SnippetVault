@@ -34,23 +34,23 @@ A modern desktop application for organizing, searching, and managing reusable co
 
 # 📑 Table of Contents
 
-- Overview
-- Problem Statement
-- Motivation
-- Features
-- Screenshots
-- Architecture
-- Application Workflow
-- Project Structure
-- Technologies Used
-- Installation
-- Usage
-- Keyboard Shortcuts
-- Testing
-- Software Engineering Concepts
-- Future Roadmap
-- Project Status
-- License
+- [📖 Overview](#-overview)
+- [🎯 Problem Statement](#-problem-statement)
+- [💡 Project Motivation](#-project-motivation)
+- [✨ Features](#-features)
+- [📸 Screenshots](#-screenshots)
+- [🏗 Architecture](#-architecture)
+- [🔄 Application Workflow](#-application-workflow)
+- [📂 Project Structure](#-project-structure)
+- [🛠 Technologies Used](#-technologies-used)
+- [🚀 Installation](#-installation)
+- [💻 Usage](#-usage)
+- [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
+- [🧪 Testing](#-testing)
+- [🎯 Software Engineering Concepts](#-software-engineering-concepts)
+- [🚀 Future Roadmap](#-future-roadmap)
+- [📌 Project Status](#-project-status)
+- [📄 License](#-license)
 
 ---
 
@@ -122,13 +122,45 @@ The primary focus was to practice:
 
 # 📸 Screenshots
 
-| Main Window | Search & Filter |
-|------------|-----------------|
-| ![](assets/screenshots/home.png) | ![](assets/screenshots/search-filter.png) |
+A quick look at SnippetVault's interface and core functionality.
 
-| Add Dialog | Favorites |
-|------------|-----------|
-| ![](assets/screenshots/add-dialog.png) | ![](assets/screenshots/favorites.png) |
+### 🏠 Main Window
+
+<p align="center">
+<img src="assets/screenshots/home.png" width="90%">
+</p>
+
+Displays all saved snippets with search, filtering, favorites, and quick actions.
+
+---
+
+### ➕ Add Snippet
+
+<p align="center">
+<img src="assets/screenshots/add-dialog.png" width="70%">
+</p>
+
+Create and save reusable code snippets with language, tags, description, and source code.
+
+---
+
+### 🔍 Search & Filter
+
+<p align="center">
+<img src="assets/screenshots/search-filter.png" width="90%">
+</p>
+
+Instantly search snippets by title and filter them by programming language.
+
+---
+
+### ⭐ Favorites
+
+<p align="center">
+<img src="assets/screenshots/favorites.png" width="90%">
+</p>
+
+Mark frequently used snippets as favorites for quicker access.
 
 ---
 
