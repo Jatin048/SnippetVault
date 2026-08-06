@@ -232,16 +232,33 @@ The application has been manually tested for:
 
 ---
 
-# 🔮 Future Enhancements
+# 🚀 Future Roadmap
 
-- 🌙 Dark mode
-- ☁ Cloud synchronization
-- 📤 Import / Export snippets
-- 🎨 Syntax highlighting
-- 🗂 Multiple snippet collections
-- 🤖 AI-powered snippet suggestions
-- 📝 Markdown preview
-- 📑 Rich text descriptions
+Although SnippetVault is fully functional, several enhancements are planned for future versions.
+
+### Version 1.1
+- 🌙 Dark Mode
+- 📌 Pin Frequently Used Snippets
+- 🎨 Syntax Highlighting
+- 📄 Rich Code Preview
+
+### Version 1.2
+- 📂 Multiple Snippet Collections
+- 📤 Export to JSON / CSV
+- 📥 Import Existing Snippets
+- 🔖 Categories and Labels
+
+### Version 2.0
+- ☁ Cloud Synchronization
+- 👤 User Accounts
+- 🔐 Secure Authentication
+- 🌍 Cross-device Access
+
+### Version 3.0
+- 🤖 AI-powered Snippet Suggestions
+- 🧠 Semantic Search
+- 💬 Explain Code using AI
+- ✨ Automatic Documentation Generation
 
 ---
 
