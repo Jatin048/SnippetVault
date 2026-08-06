@@ -90,6 +90,8 @@ class AddSnippetDialog(tk.Toplevel):
         self.favorite_var = tk.BooleanVar(value=False)
 
         self.title("Edit Snippet" if self.snippet is not None else "Add Snippet")
+        self.geometry("680x620")
+        self.minsize(620, 520)
         self.resizable(True, True)
         self.transient(parent)
         self.grab_set()
@@ -103,7 +105,7 @@ class AddSnippetDialog(tk.Toplevel):
 
     def _create_widgets(self) -> None:
         """Create the dialog form and action buttons."""
-        form = ttk.Frame(self, padding=16)
+        form = ttk.Frame(self, padding=(20, 18))
         form.grid(row=0, column=0, sticky="nsew")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -111,11 +113,21 @@ class AddSnippetDialog(tk.Toplevel):
         form.rowconfigure(3, weight=1)
         form.rowconfigure(4, weight=3)
 
-        ttk.Label(form, text="Title:").grid(row=0, column=0, sticky="nw")
+        ttk.Label(form, text="Title:").grid(
+            row=0,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         self.title_entry = ttk.Entry(form, textvariable=self.title_var, width=50)
         self.title_entry.grid(row=0, column=1, pady=(0, 8), sticky="ew")
 
-        ttk.Label(form, text="Language:").grid(row=1, column=0, sticky="nw")
+        ttk.Label(form, text="Language:").grid(
+            row=1,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         self.language_combo = ttk.Combobox(
             form,
             textvariable=self.language_var,
@@ -124,7 +136,12 @@ class AddSnippetDialog(tk.Toplevel):
         )
         self.language_combo.grid(row=1, column=1, pady=(0, 8), sticky="ew")
 
-        ttk.Label(form, text="Tags:").grid(row=2, column=0, sticky="nw")
+        ttk.Label(form, text="Tags:").grid(
+            row=2,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         ttk.Entry(form, textvariable=self.tags_var).grid(
             row=2,
             column=1,
@@ -132,11 +149,21 @@ class AddSnippetDialog(tk.Toplevel):
             sticky="ew",
         )
 
-        ttk.Label(form, text="Description:").grid(row=3, column=0, sticky="nw")
+        ttk.Label(form, text="Description:").grid(
+            row=3,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         self.description_text = tk.Text(form, height=5, wrap="word")
         self.description_text.grid(row=3, column=1, pady=(0, 8), sticky="nsew")
 
-        ttk.Label(form, text="Code:").grid(row=4, column=0, sticky="nw")
+        ttk.Label(form, text="Code:").grid(
+            row=4,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         self.code_text = scrolledtext.ScrolledText(form, height=12, wrap="none")
         self.code_text.grid(row=4, column=1, pady=(0, 8), sticky="nsew")
 
@@ -149,7 +176,13 @@ class AddSnippetDialog(tk.Toplevel):
         button_frame = ttk.Frame(form)
         button_frame.grid(row=6, column=1, pady=(16, 0), sticky="e")
         save_label = "Save Changes" if self.snippet is not None else "Save"
-        ttk.Button(button_frame, text=save_label, command=self._save).grid(
+        self.save_button = ttk.Button(
+            button_frame,
+            text=save_label,
+            command=self._save,
+            default="active",
+        )
+        self.save_button.grid(
             row=0,
             column=0,
             padx=(0, 8),
@@ -175,6 +208,14 @@ class AddSnippetDialog(tk.Toplevel):
         """Bind keyboard shortcuts for common dialog actions."""
         self.bind("<Escape>", self._cancel)
         self.bind("<Control-s>", self._save)
+        self.bind("<Return>", self._save_on_enter)
+
+    def _save_on_enter(self, event: tk.Event) -> str | None:
+        """Save on Enter outside multiline fields, where Enter adds a newline."""
+        if event.widget in (self.description_text, self.code_text):
+            return None
+
+        return self._save(event)
 
     def _save(self, event: tk.Event | None = None) -> str | None:
         """Validate the form, save through the controller, and close on success."""
@@ -257,17 +298,21 @@ class SnippetViewDialog(tk.Toplevel):
         self.snippet = snippet
 
         self.title("View Snippet")
+        self.geometry("680x620")
+        self.minsize(620, 520)
         self.resizable(True, True)
         self.transient(parent)
         self.grab_set()
 
         self._create_widgets()
         self.bind("<Escape>", self._close)
+        self.bind("<Return>", self._close)
         self._center_over_parent()
+        self.after_idle(self.close_button.focus_set)
 
     def _create_widgets(self) -> None:
         """Create the read-only snippet details."""
-        form = ttk.Frame(self, padding=16)
+        form = ttk.Frame(self, padding=(20, 18))
         form.grid(row=0, column=0, sticky="nsew")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -279,13 +324,23 @@ class SnippetViewDialog(tk.Toplevel):
         self._add_readonly_entry(form, "Language:", self.snippet.language, 1)
         self._add_readonly_entry(form, "Tags:", ", ".join(self.snippet.tags), 2)
 
-        ttk.Label(form, text="Description:").grid(row=3, column=0, sticky="nw")
+        ttk.Label(form, text="Description:").grid(
+            row=3,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         description = tk.Text(form, height=5, wrap="word", state="normal")
         description.insert("1.0", self.snippet.description)
         description.configure(state="disabled")
         description.grid(row=3, column=1, pady=(0, 8), sticky="nsew")
 
-        ttk.Label(form, text="Code:").grid(row=4, column=0, sticky="nw")
+        ttk.Label(form, text="Code:").grid(
+            row=4,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         code = scrolledtext.ScrolledText(form, height=12, wrap="none", state="normal")
         code.insert("1.0", self.snippet.code)
         code.configure(state="disabled")
@@ -298,7 +353,8 @@ class SnippetViewDialog(tk.Toplevel):
             variable=favorite_var,
             state="disabled",
         ).grid(row=5, column=1, sticky="w")
-        ttk.Button(form, text="Close", command=self._close).grid(
+        self.close_button = ttk.Button(form, text="Close", command=self._close)
+        self.close_button.grid(
             row=6,
             column=1,
             pady=(16, 0),
@@ -313,7 +369,12 @@ class SnippetViewDialog(tk.Toplevel):
         row: int,
     ) -> None:
         """Add a labelled read-only entry to the form."""
-        ttk.Label(parent, text=label).grid(row=row, column=0, sticky="nw")
+        ttk.Label(parent, text=label).grid(
+            row=row,
+            column=0,
+            padx=(0, 12),
+            sticky="nw",
+        )
         entry = ttk.Entry(parent)
         entry.insert(0, value)
         entry.configure(state="readonly")
@@ -347,8 +408,16 @@ class SnippetVaultUI:
         self.root.geometry("1100x700")
         self.root.minsize(900, 600)
 
+        self._configure_styles()
         self._create_widgets()
         self.refresh_snippet_table()
+
+    def _configure_styles(self) -> None:
+        """Apply small, consistent visual improvements to ttk widgets."""
+        style = ttk.Style(self.root)
+        style.configure("Action.TButton", padding=(12, 6), width=12)
+        style.configure("Treeview", rowheight=28)
+        style.configure("Treeview.Heading", padding=(8, 6))
 
     def _create_widgets(self) -> None:
         """Create and arrange the main interface sections."""
@@ -363,7 +432,7 @@ class SnippetVaultUI:
 
     def _create_search_section(self) -> None:
         """Create the search and language-filter controls."""
-        top_frame = ttk.Frame(self.root, padding=(12, 12, 12, 6))
+        top_frame = ttk.Frame(self.root, padding=(16, 16, 16, 8))
         top_frame.grid(row=0, column=0, sticky="ew")
         top_frame.columnconfigure(1, weight=1)
 
@@ -395,7 +464,7 @@ class SnippetVaultUI:
 
     def _create_snippet_table(self) -> None:
         """Create the snippet table and its vertical scrollbar."""
-        center_frame = ttk.Frame(self.root, padding=(12, 6))
+        center_frame = ttk.Frame(self.root, padding=(16, 8))
         center_frame.grid(row=1, column=0, sticky="nsew")
         center_frame.columnconfigure(0, weight=1)
         center_frame.rowconfigure(0, weight=1)
@@ -404,9 +473,12 @@ class SnippetVaultUI:
         self.snippet_table = ttk.Treeview(
             center_frame,
             columns=columns,
+            displaycolumns=("title", "language", "tags", "favorite"),
             show="headings",
             selectmode="browse",
         )
+        self.snippet_table.tag_configure("even", background="#f5f7fa")
+        self.snippet_table.tag_configure("odd", background="#ffffff")
 
         headings = {
             "id": "ID",
@@ -416,19 +488,20 @@ class SnippetVaultUI:
             "favorite": "Favorite",
         }
         widths = {
-            "id": 70,
-            "title": 280,
+            "id": 0,
+            "title": 320,
             "language": 140,
-            "tags": 360,
-            "favorite": 100,
+            "tags": 300,
+            "favorite": 90,
         }
         for column in columns:
             self.snippet_table.heading(column, text=headings[column])
             self.snippet_table.column(
                 column,
                 width=widths[column],
-                minwidth=60,
+                minwidth=0 if column == "id" else 80,
                 anchor="center" if column in {"id", "favorite"} else "w",
+                stretch=column == "title",
             )
 
         scrollbar = ttk.Scrollbar(
@@ -448,7 +521,7 @@ class SnippetVaultUI:
 
     def _create_buttons(self) -> None:
         """Create snippet action buttons."""
-        bottom_frame = ttk.Frame(self.root, padding=(12, 6))
+        bottom_frame = ttk.Frame(self.root, padding=(16, 8, 16, 12))
         bottom_frame.grid(row=2, column=0, sticky="ew")
 
         buttons = (
@@ -460,12 +533,14 @@ class SnippetVaultUI:
             ("Refresh", self._reset_filters_and_refresh, "Reload all snippets"),
         )
         for column, (label, command, tooltip_text) in enumerate(buttons):
+            bottom_frame.columnconfigure(column, weight=1, uniform="actions")
             button = ttk.Button(
                 bottom_frame,
                 text=label,
                 command=command,
+                style="Action.TButton",
             )
-            button.grid(row=0, column=column, padx=(0, 8))
+            button.grid(row=0, column=column, padx=4, sticky="ew")
             Tooltip(button, tooltip_text)
 
     def _create_status_bar(self) -> None:
@@ -475,7 +550,7 @@ class SnippetVaultUI:
             textvariable=self.status_var,
             anchor="w",
             relief="sunken",
-            padding=(8, 4),
+            padding=(12, 6),
         )
         status_bar.grid(row=3, column=0, sticky="ew")
 
@@ -750,12 +825,13 @@ class SnippetVaultUI:
         for item_id in self.snippet_table.get_children():
             self.snippet_table.delete(item_id)
 
-        for snippet in snippets:
+        for index, snippet in enumerate(snippets):
             item_id = str(snippet.id)
             self.snippet_table.insert(
                 "",
                 "end",
                 iid=item_id,
+                tags=("even" if index % 2 == 0 else "odd",),
                 values=(
                     snippet.id,
                     snippet.title,
