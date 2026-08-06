@@ -262,11 +262,11 @@ Although SnippetVault is fully functional, several enhancements are planned for 
 
 ---
 
-# 👨‍💻 Why I Built This Project
+# 💡 Why I Built This
 
-I built SnippetVault to improve my Python skills by developing a complete desktop application rather than following isolated tutorials.
+Developers often save useful code snippets across multiple files, notes, and previous projects, making them difficult to locate later.
 
-The project helped me gain practical experience with software architecture, database management, GUI development, and clean code organization while creating something useful for developers.
+I built SnippetVault to solve this problem while strengthening my understanding of Python, desktop application development, software architecture, and database integration. Instead of following isolated tutorials, I wanted to build a complete application that reflects real-world software engineering practices and demonstrates clean, maintainable code.
 
 ---
 
