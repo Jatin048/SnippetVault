@@ -4,6 +4,7 @@ import tkinter as tk
 from collections.abc import Callable
 from tkinter import messagebox, scrolledtext, ttk
 
+from clipboard import copy_text
 from controller import SnippetController
 from database import DatabaseError
 from models import Snippet
@@ -17,6 +18,52 @@ def _center_dialog(dialog: tk.Toplevel, parent: tk.Tk) -> None:
     x_position = parent.winfo_rootx() + (parent.winfo_width() - width) // 2
     y_position = parent.winfo_rooty() + (parent.winfo_height() - height) // 2
     dialog.geometry(f"+{max(x_position, 0)}+{max(y_position, 0)}")
+
+
+class Tooltip:
+    """Show short help text when the pointer rests over a widget."""
+
+    def __init__(self, widget: ttk.Button, text: str) -> None:
+        """Attach a tooltip to a button."""
+        self.widget = widget
+        self.text = text
+        self.after_id: str | None = None
+        self.window: tk.Toplevel | None = None
+        self.widget.bind("<Enter>", self._schedule_show, add="+")
+        self.widget.bind("<Leave>", self._hide, add="+")
+        self.widget.bind("<ButtonPress>", self._hide, add="+")
+
+    def _schedule_show(self, event: tk.Event | None = None) -> None:
+        """Schedule the tooltip after a short pause."""
+        self.after_id = self.widget.after(500, self._show)
+
+    def _show(self) -> None:
+        """Display the tooltip beside its widget."""
+        self.after_id = None
+        if self.window is not None:
+            return
+
+        self.window = tk.Toplevel(self.widget)
+        self.window.wm_overrideredirect(True)
+        self.window.wm_geometry(
+            f"+{self.widget.winfo_rootx() + 12}"
+            f"+{self.widget.winfo_rooty() + self.widget.winfo_height() + 4}"
+        )
+        ttk.Label(
+            self.window,
+            text=self.text,
+            padding=(6, 3),
+            relief="solid",
+        ).pack()
+
+    def _hide(self, event: tk.Event | None = None) -> None:
+        """Cancel or remove the tooltip."""
+        if self.after_id is not None:
+            self.widget.after_cancel(self.after_id)
+            self.after_id = None
+        if self.window is not None:
+            self.window.destroy()
+            self.window = None
 
 
 class AddSnippetDialog(tk.Toplevel):
@@ -293,6 +340,8 @@ class SnippetVaultUI:
         self.language_var = tk.StringVar(value="All")
         self.status_var = tk.StringVar(value="Ready")
         self.all_snippets: list[Snippet] = []
+        self.visible_snippet_count = 0
+        self.status_reset_id: str | None = None
 
         self.root.title("SnippetVault")
         self.root.geometry("1100x700")
@@ -310,6 +359,7 @@ class SnippetVaultUI:
         self._create_snippet_table()
         self._create_buttons()
         self._create_status_bar()
+        self._bind_shortcuts()
 
     def _create_search_section(self) -> None:
         """Create the search and language-filter controls."""
@@ -390,6 +440,11 @@ class SnippetVaultUI:
         self.snippet_table.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.snippet_table.bind("<Double-1>", self._view_selected_snippet)
+        self.snippet_table.bind(
+            "<Button-1>",
+            self._clear_selection_on_empty_click,
+            add="+",
+        )
 
     def _create_buttons(self) -> None:
         """Create snippet action buttons."""
@@ -397,19 +452,21 @@ class SnippetVaultUI:
         bottom_frame.grid(row=2, column=0, sticky="ew")
 
         buttons = (
-            ("Add", self._open_add_dialog),
-            ("Edit", self._open_edit_dialog),
-            ("Delete", self._delete_selected_snippet),
-            ("Favorite", self._toggle_selected_favorite),
-            ("Copy", self._show_not_implemented),
-            ("Refresh", self._reset_filters_and_refresh),
+            ("Add", self._open_add_dialog, "Add a new snippet"),
+            ("Edit", self._open_edit_dialog, "Edit the selected snippet"),
+            ("Delete", self._delete_selected_snippet, "Delete the selected snippet"),
+            ("Favorite", self._toggle_selected_favorite, "Toggle favorite status"),
+            ("Copy", self._copy_selected_snippet, "Copy the selected snippet's code"),
+            ("Refresh", self._reset_filters_and_refresh, "Reload all snippets"),
         )
-        for column, (label, command) in enumerate(buttons):
-            ttk.Button(
+        for column, (label, command, tooltip_text) in enumerate(buttons):
+            button = ttk.Button(
                 bottom_frame,
                 text=label,
                 command=command,
-            ).grid(row=0, column=column, padx=(0, 8))
+            )
+            button.grid(row=0, column=column, padx=(0, 8))
+            Tooltip(button, tooltip_text)
 
     def _create_status_bar(self) -> None:
         """Create the status bar at the bottom of the window."""
@@ -422,9 +479,18 @@ class SnippetVaultUI:
         )
         status_bar.grid(row=3, column=0, sticky="ew")
 
-    def _open_add_dialog(self) -> None:
+    def _bind_shortcuts(self) -> None:
+        """Bind keyboard shortcuts for common main-window actions."""
+        self.root.bind("<Control-n>", self._open_add_dialog)
+        self.root.bind("<Control-f>", self._focus_search)
+        self.root.bind("<Control-r>", self._reset_filters_and_refresh)
+        self.root.bind("<Delete>", self._delete_selected_snippet)
+        self.root.bind("<Control-c>", self._copy_selected_snippet)
+
+    def _open_add_dialog(self, event: tk.Event | None = None) -> str | None:
         """Open the reusable dialog used to create a snippet."""
         AddSnippetDialog(self.root, self.controller, self.refresh_snippet_table)
+        return "break" if event is not None else None
 
     def _open_edit_dialog(self) -> None:
         """Open the selected snippet in an editable dialog."""
@@ -445,36 +511,36 @@ class SnippetVaultUI:
 
         return "break" if event is not None else None
 
-    def _delete_selected_snippet(self) -> None:
+    def _delete_selected_snippet(self, event: tk.Event | None = None) -> str | None:
         """Confirm and delete the selected snippet."""
         selected_item = self._get_selected_item()
         if selected_item is None:
-            return
+            return "break" if event is not None else None
 
         snippet = self._get_selected_snippet(selected_item)
         if snippet is None:
-            return
+            return "break" if event is not None else None
         if snippet.id is None:
             messagebox.showerror(
                 "Could not delete snippet",
                 "This snippet does not have a valid id.",
                 parent=self.root,
             )
-            return
+            return "break" if event is not None else None
 
         if not messagebox.askyesno(
             "Delete Snippet",
             "Are you sure you want to delete this snippet?",
             parent=self.root,
         ):
-            return
+            return "break" if event is not None else None
 
         next_selection = self._neighbor_snippet_id(selected_item)
         try:
             deleted = self.controller.delete_snippet(snippet.id)
         except (ValueError, DatabaseError) as error:
             messagebox.showerror("Could not delete snippet", str(error), parent=self.root)
-            return
+            return "break" if event is not None else None
 
         if not deleted:
             messagebox.showerror(
@@ -483,7 +549,7 @@ class SnippetVaultUI:
                 parent=self.root,
             )
             self.refresh_snippet_table(next_selection)
-            return
+            return "break" if event is not None else None
 
         self.refresh_snippet_table(next_selection)
         messagebox.showinfo(
@@ -491,6 +557,7 @@ class SnippetVaultUI:
             "Snippet deleted successfully.",
             parent=self.root,
         )
+        return "break" if event is not None else None
 
     def _toggle_selected_favorite(self) -> None:
         """Toggle the favorite status of the selected snippet."""
@@ -525,6 +592,31 @@ class SnippetVaultUI:
             return
 
         self.refresh_snippet_table(snippet.id)
+
+    def _copy_selected_snippet(self, event: tk.Event | None = None) -> str | None:
+        """Copy only the selected snippet's code to the system clipboard."""
+        snippet = self._get_selected_snippet()
+        if snippet is None:
+            return "break" if event is not None else None
+
+        try:
+            copy_text(self.root, snippet.code)
+        except tk.TclError as error:
+            messagebox.showerror(
+                "Could not copy snippet",
+                str(error),
+                parent=self.root,
+            )
+            return "break" if event is not None else None
+
+        self._show_temporary_status("Snippet copied to clipboard.")
+        return "break" if event is not None else None
+
+    def _focus_search(self, event: tk.Event | None = None) -> str | None:
+        """Focus the search input."""
+        self.search_entry.focus_set()
+        self.search_entry.selection_range(0, tk.END)
+        return "break" if event is not None else None
 
     def _get_selected_item(self) -> str | None:
         """Return the single selected table item or show a helpful error."""
@@ -589,11 +681,30 @@ class SnippetVaultUI:
         self._update_language_filter()
         self._apply_filters(selected_snippet_id=selected_snippet_id)
 
-    def _reset_filters_and_refresh(self) -> None:
+    def _reset_filters_and_refresh(
+        self,
+        event: tk.Event | None = None,
+    ) -> str | None:
         """Clear filters and reload the complete snippet list."""
         self.search_var.set("")
         self.language_var.set("All")
+        self._clear_table_selection()
         self.refresh_snippet_table()
+        return "break" if event is not None else None
+
+    def _clear_selection_on_empty_click(self, event: tk.Event) -> None:
+        """Clear selection when the user clicks unused table space."""
+        row_id = self.snippet_table.identify_row(event.y)
+        region = self.snippet_table.identify_region(event.x, event.y)
+        if not row_id and region == "nothing":
+            self._clear_table_selection()
+
+    def _clear_table_selection(self) -> None:
+        """Remove the current table selection and item focus."""
+        selected_items = self.snippet_table.selection()
+        if selected_items:
+            self.snippet_table.selection_remove(*selected_items)
+        self.snippet_table.focus("")
 
     def _update_language_filter(self) -> None:
         """Populate the filter with languages present in the cached snippets."""
@@ -664,6 +775,28 @@ class SnippetVaultUI:
         self.status_var.set(
             f"Showing {len(snippets)} of {len(self.all_snippets)} snippets"
         )
+        self.visible_snippet_count = len(snippets)
+        self._cancel_status_reset()
+
+    def _show_temporary_status(self, message: str) -> None:
+        """Show a short status message before restoring the result count."""
+        self._cancel_status_reset()
+        self.status_var.set(message)
+        self.status_reset_id = self.root.after(3_000, self._restore_result_status)
+
+    def _restore_result_status(self) -> None:
+        """Restore the status text used for the current filtered results."""
+        self.status_reset_id = None
+        self.status_var.set(
+            f"Showing {self.visible_snippet_count} of "
+            f"{len(self.all_snippets)} snippets"
+        )
+
+    def _cancel_status_reset(self) -> None:
+        """Cancel a pending temporary-status reset, if one exists."""
+        if self.status_reset_id is not None:
+            self.root.after_cancel(self.status_reset_id)
+            self.status_reset_id = None
 
     def _current_selected_snippet_id(self) -> int | None:
         """Return the selected snippet id without showing an error dialog."""

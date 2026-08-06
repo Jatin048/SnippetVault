@@ -1,4 +1,10 @@
-"""Clipboard integration for SnippetVault.
+"""Reusable clipboard helpers for SnippetVault."""
 
-Clipboard monitoring and copy/paste helpers will be implemented here.
-"""
+import tkinter as tk
+
+
+def copy_text(window: tk.Misc, text: str) -> None:
+    """Replace the system clipboard contents with text."""
+    window.clipboard_clear()
+    window.clipboard_append(text)
+    window.update()
